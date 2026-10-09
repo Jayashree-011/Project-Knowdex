@@ -1,0 +1,14 @@
+com\knowdex\controller\NoteController.class
+com\knowdex\model\NoteModel.class
+com\knowdex\service\StorageService$5.class
+com\knowdex\model\FolderModel.class
+com\knowdex\service\StorageService$2.class
+com\knowdex\service\StorageService$1.class
+com\knowdex\config\WebConfig.class
+com\knowdex\service\StorageService$3.class
+com\knowdex\controller\FolderController.class
+com\knowdex\KnowdexApplication.class
+com\knowdex\service\StorageService.class
+com\knowdex\controller\DocumentController.class
+com\knowdex\service\StorageService$4.class
+com\knowdex\model\DocumentModel.class
