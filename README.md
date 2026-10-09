@@ -44,15 +44,6 @@ Later pages past the length cap are never sent to the model. Questions do not se
 
 This is **in-context / full-document prompting**, not Retrieval-Augmented Generation (RAG).
 
-| RAG (not this project) | This prototype |
-| --- | --- |
-| Split into chunks | Whole-document extract |
-| Embed and store in a vector index | No embeddings, no vector store |
-| Retrieve top-k relevant chunks | Truncate and stuff the prompt |
-| Answer from retrieved snippets | Answer from the truncated PDF text |
-
-Scanned / image-only PDFs have no extractable text, so summary and chat cannot run on them.
-
 ---
 
 ## Tech stack
@@ -142,7 +133,7 @@ npm run dev -- --port 3000
 
 ## Prototype limits
 
-Treat these as known constraints of the PoC, not bugs to hide:
+
 
 - **Truncation, not indexing** — long PDFs lose content after the character cap
 - **One document at a time** — chat does not search across your whole library
