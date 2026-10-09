@@ -121,18 +121,13 @@ npm run dev -- --port 3000
 ## Data location
 
 ```
-~/.knowdex_storage/
-├── pdfs/                 uploaded PDFs
-└── metadata/
-    ├── folders.json
-    ├── documents.json
-    └── notes.json
 ```
 
 ---
 
 ## Prototype limits
 
+<img width="1917" height="861" alt="Screenshot 2026-10-09 232714" src="https://github.com/user-attachments/assets/2e8b0a70-469a-4c55-a0ae-0bb311947d11" />
 
 
 - **Truncation, not indexing** — long PDFs lose content after the character cap
