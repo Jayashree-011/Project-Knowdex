@@ -2,7 +2,7 @@
 
 **A basic prototype / proof of concept** for an AI-powered knowledge workspace: organize PDFs into folders, read them in the browser, generate summaries, and ask questions about a selected document using Google Gemini.
 
-This is **not a production system** and does not currently implement a complete RAG pipeline. Long documents are **truncated rather than chunked and indexed**.
+
 
 ## Status
 
