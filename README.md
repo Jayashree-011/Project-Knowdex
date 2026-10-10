@@ -2,105 +2,91 @@
 
 **A basic prototype / proof of concept** for an AI-powered knowledge workspace: organize PDFs into folders, read them in the browser, generate summaries, and ask questions about a selected document using Google Gemini.
 
-This is **not a production system** and **not a RAG pipeline**. Long documents are **truncated**, not chunked and indexed.
-
----
+This is **not a production system** and does not currently implement a complete RAG pipeline. Long documents are **truncated rather than chunked and indexed**.
 
 ## Status
 
-Knowdex is a student/demo prototype meant to show the idea end to end:
+Knowdex is a student/demo prototype designed to demonstrate the idea end to end:
 
-- local PDF + folder workspace
+- Local PDF and folder workspace
 - PDF text extraction
-- Gemini summarization and Q&A from stuffed document text
+- Gemini-powered summarization and question answering using extracted document text
 
-It is intentionally simple. There is no vector database, no embeddings, and no semantic retrieval.
+It is intentionally simple. There is currently no vector database, embeddings, or semantic retrieval. Documents are processed by extracting their text and passing it to Gemini, with long documents truncated when they exceed the character limit rather than being properly chunked and indexed.
 
----
+**Future improvements could include implementing a Retrieval-Augmented Generation (RAG) pipeline** with document chunking, embedding generation, vector storage, and semantic similarity search. These enhancements could enable more accurate, context-aware answers and efficient retrieval from larger documents.
 
-## What it does
+## What It Does
 
 - Create and manage topic folders
-- Upload PDFs (single or bulk) and drag them into folders
-- Bulk upload can ask Gemini to name folders and assign documents by topic
-- View PDFs in the browser
-- Generate a structured Markdown summary of a selected PDF
-- Chat with a selected PDF using only that file’s extracted text
+- Upload PDFs individually or in bulk and organize them into folders
+- Use Gemini to suggest folder names and assign documents by topic during bulk uploads
+- View PDFs directly in the browser
+- Generate structured Markdown summaries of selected PDFs
+- Chat with a selected PDF using only that document's extracted text
 - Persist files and metadata on the local filesystem (`~/.knowdex_storage/`)
 
----
+## Tech Stack
 
-## How AI works (important)
-
-When you summarize or chat:
-
-1. Apache PDFBox extracts **plain text** from the PDF.
-2. That text is **cut to a character limit** (about 25,000 for summary, 30,000 for chat).
-3. The truncated text is **pasted into a Gemini prompt** with your question or summary instructions.
-4. Gemini returns Markdown. Summaries can be cached on the document record.
-
-**Long documents are truncated, not chunked and indexed.**  
-Later pages past the length cap are never sent to the model. Questions do not search for the most relevant passages; they always use the same truncated prefix of the selected file.
-
-This is **in-context / full-document prompting**, not Retrieval-Augmented Generation (RAG).
-
----
-
-## Tech stack
-
-| Layer | Choice |
+| Layer | Technology |
 | --- | --- |
 | Frontend | React, Vite, Axios, Lucide icons |
 | Backend | Java 21, Spring Boot 3.2.5 |
-| PDF text | Apache PDFBox 3.x |
-| AI | Google Gemini REST `generateContent` |
-| Storage | Local files + JSON (no database) |
+| PDF Text Extraction | Apache PDFBox 3.x |
+| AI Integration | Google Gemini REST API (`generateContent`) |
+| Storage | Local filesystem and JSON files (no database) |
 
----
+## Project Structure
 
-## Project structure
-
-```
-├── knowdex-backend/     Spring Boot API (port 8087)
-├── knowdex-frontend/    React UI (Vite, typically port 5173 or 3000)
+```text
+├── knowdex-backend/
+├── knowdex-frontend/
 └── README.md
 ```
 
-Core backend logic lives in `knowdex-backend/src/main/java/com/knowdex/service/StorageService.java` (disk I/O, PDF extract, Gemini calls, folder clustering).
+- `knowdex-backend/` — Spring Boot API (port 8087)
+- `knowdex-frontend/` — React UI powered by Vite (port 5173 by default, or 3000 if configured)
 
----
+Core backend logic lives in:
+
+`knowdex-backend/src/main/java/com/knowdex/service/StorageService.java`
+
+This service handles filesystem operations, PDF text extraction, Gemini API calls, and folder clustering.
 
 ## Prerequisites
 
-- JDK 21+
+- JDK 21 or later
 - Apache Maven
-- Node.js 18+ and npm
+- Node.js 18 or later and npm
 - A [Google Gemini API key](https://aistudio.google.com/apikey)
-
----
 
 ## Setup
 
-### 1. Configure the Gemini API key
+### 1. Configure the Gemini API Key
 
 Edit `knowdex-backend/src/main/resources/application.properties`:
 
 ```properties
 gemini.api.key=YOUR_GEMINI_API_KEY
+server.port=8087
 ```
 
-Do not commit a real key. Backend listens on **port 8087** (`server.port=8087`).
+Replace `YOUR_GEMINI_API_KEY` with your actual Gemini API key.
 
-### 2. Start the backend
+**Security note:** Do not commit your real API key to version control.
+
+### 2. Start the Backend
 
 ```bash
 cd knowdex-backend
 mvn spring-boot:run
 ```
 
-API: `http://localhost:8087`
+Backend API: `http://localhost:8087`
 
-### 3. Start the frontend
+### 3. Start the Frontend
+
+Open another terminal:
 
 ```bash
 cd knowdex-frontend
@@ -108,34 +94,52 @@ npm install
 npm run dev
 ```
 
-The Vite dev server proxies `/api` to `http://localhost:8087`. Open the URL Vite prints (default is often `http://localhost:5173`).
+Open the URL printed by Vite, usually `http://localhost:5173`.
 
-To force port 3000:
+To run the frontend on port 3000:
 
 ```bash
 npm run dev -- --port 3000
 ```
 
----
+The Vite development server proxies `/api` requests to `http://localhost:8087`.
 
-## Data location
+## Data Storage
 
+Knowdex stores uploaded files and metadata locally in:
+
+```text
+~/.knowdex_storage/
 ```
-```
+
+Files and metadata persist between application restarts.
+
+## Prototype Limitations
+
+- **Truncation instead of indexing:** Long PDFs are truncated when they exceed the configured character limit, potentially excluding relevant information.
+- **Single-document chat:** Questions are answered using the selected document rather than searching across the entire library.
+- **No RAG pipeline:** The current implementation does not use document chunking, embeddings, a vector database, or semantic similarity search.
+- **Local filesystem storage:** JSON-based metadata storage is intended for a local demo and is not designed for robust concurrent or multi-user access.
+- **Text-based PDFs only:** Scanned PDFs without extractable text are not supported by the current extraction workflow.
+- **API key configuration:** Storing the Gemini API key in `application.properties` is suitable for local experimentation but is not recommended for production deployments.
+
+## Future Enhancements
+
+Potential improvements include:
+
+- **RAG implementation:** Split documents into smaller, overlapping chunks and retrieve relevant passages for each question.
+- **Embedding generation:** Convert document chunks and user queries into vector representations.
+- **Vector database integration:** Store and retrieve embeddings using a suitable vector store such as Chroma or FAISS.
+- **Semantic search:** Retrieve relevant passages based on meaning instead of passing the entire extracted document to the AI model.
+- **Library-wide question answering:** Retrieve relevant information across multiple PDFs in the workspace.
+- **Improved PDF support:** Add OCR to extract text from scanned documents.
+- **Persistent database:** Replace JSON metadata files with a database for improved querying and data management.
+- **Secure configuration:** Use environment variables or a secrets manager to manage API credentials.
+
+## Project Screenshot
+
+![Knowdex application interface](https://github.com/user-attachments/assets/2e8b0a70-469a-4c55-a0ae-0bb311947d11)
 
 ---
 
-## Prototype limits
-
-<img width="1917" height="861" alt="Screenshot 2026-10-09 232714" src="https://github.com/user-attachments/assets/2e8b0a70-469a-4c55-a0ae-0bb311947d11" />
-
-
-- **Truncation, not indexing** — long PDFs lose content after the character cap
-- **One document at a time** — chat does not search across your whole library
-- **No RAG** — no chunking, embeddings, or similarity retrieval
-- **Filesystem JSON** — not multi-user, not concurrent-safe beyond a local demo
-- **Extractable text only** — scanned PDFs are unsupported
-- **API key in properties** — fine for a local prototype; not a production secret setup
-
----
-
+**Knowdex** is an early-stage prototype exploring how AI can simplify personal document organization and knowledge discovery. Its current implementation provides basic PDF management and Gemini-powered document interactions, with RAG and semantic retrieval identified as potential future enhancements.
